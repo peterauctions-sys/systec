@@ -1,0 +1,46 @@
+# 客户预览子域名 - Nginx 反向代理示例
+#
+# 使用前请：
+#   1. 把 yourdomain.com 替换成你自己的域名
+#   2. 在 DNS 服务商处添加一条通配符解析记录：
+#        类型: A
+#        主机记录: *
+#        记录值: 你的服务器公网 IP
+#      这样 wwairbnb.yourdomain.com、任意客户名.yourdomain.com
+#      都会指向同一台服务器
+#   3. 确保 server/server.js 已经用 pm2 / systemd / docker 等方式常驻运行，
+#      监听本地端口（默认 8080）
+#
+# 完成后，Node 服务会根据请求的 Host 自动去 sites/<子域名前缀>/ 下取文件，
+# 无需为每个客户单独配置 Nginx server block。
+
+server {
+    listen 80;
+    server_name *.yourdomain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# 如需 HTTPS（推荐配合 certbot 的通配符证书 *.yourdomain.com）：
+#
+# server {
+#     listen 443 ssl;
+#     server_name *.yourdomain.com;
+#
+#     ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+#
+#     location / {
+#         proxy_pass http://127.0.0.1:8080;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }

@@ -1,0 +1,13 @@
+{
+  "name": "client-preview-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "根据子域名把请求分发到 sites/ 下对应客户文件夹的静态预览服务器",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
